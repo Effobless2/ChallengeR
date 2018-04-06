@@ -1,5 +1,5 @@
-# install.packages("tm");
-install.packages("SnowballC")
+install.packages("tm");
+install.packages("SnowballC");
 
 library(tm)
 library(NLP)
@@ -23,7 +23,7 @@ removeBalises=function(x){
 }
 
 cleanCorpus <- function(path){
-corp<-VCorpus(DirSource(path, recursive=TRUE))
+corp<-VCorpus(DirSource(path, encoding="latin1", recursive=TRUE))
 corp<-tm_map(corp,content_transformer(tolower))
 corp<-tm_map(corp,content_transformer(splash))
 corp<-tm_map(corp,content_transformer(removeScript))
@@ -33,25 +33,26 @@ corp<-tm_map(corp,removeWords,words=stopwords('en'))
 corp<-tm_map(corp,stemDocument)
 corp<-tm_map(corp,removePunctuation)
 
-# blog<-VCorpus(DirSource("./training2016/blog"))
-# blog<-tm_map(blog,content_transformer(tolower))
-# blog<-tm_map(blog,content_transformer(splash))
-# blog<-tm_map(blog,content_transformer(removeScript))
-# blog<-tm_map(blog,content_transformer(removeBalises))
-# blog<-tm_map(blog,removeNumbers)
-# blog<-tm_map(blog,removeWords,words=stopwords('en'))
-# blog<-tm_map(blog,stemDocument)
-# blog<-tm_map(blog,removePunctuation)
-
-
 
 mat<-DocumentTermMatrix(corp,control=list())
-vocab<-findFreqTerms(mat,lowfreq=100)
+vocab<-findFreqTerms(mat,lowfreq=20)
+
 mat500<-mat[,vocab]
 
 mat <- as.matrix(mat500)
+mat <- cbind(mat, classe = c(rep(1,150), rep(2,150), rep(3,150), rep(4,150), rep(5,150), rep(6,150), rep(7,150)));
+
+header = head(mat)
+
+return (mat);
+
 }
 
-mat <- cleanCorpus("./training2016")
+listeClasses <- vec("accueil", "blog", "commerce", "FAQ", "home", "liste", "recherche");
+
+mat <- cleanCorpus("./training2016/")
+write.csv(mat, file = "MyData.csv")
+save(mat, file = "MyData.rda")
+
 # classes <- 1
 # train <- cbind(mat,classes)
